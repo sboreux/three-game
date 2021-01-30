@@ -1,8 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useThree, useFrame } from 'react-three-fiber';
-import { Vector3 } from 'three';
+import { Vector3, Camera } from 'three';
 import { useSphere } from '@react-three/cannon';
-import { useState } from 'react/cjs/react.development';
 import { useKeyboardControls } from '../hooks/useKeyboardControls';
 
 
@@ -11,19 +10,24 @@ let updateVelocity = (velocity, control, rotation) => {
 
     const result = new Vector3((control.moveRight?1:0) - (control.moveLeft?1:0), 0,(control.moveBackward?1:0) - (control.moveForward?1:0));
     
-    result
+    result.normalize()
         .multiplyScalar(SPEED)
-        .normalize()
 
     result.applyEuler(rotation)
+    let doJump = control.Jump && Math.abs(velocity[1].toFixed(2)) < 0.05
+    return [result.x, doJump?8:velocity[1], result.z]
 
-    return [result.x, result.y, result.z]
+}
 
+let updateCamera = (camera:Camera, control) => {
+    if(control.cameraLeft) camera.rotateY(0.03)
+    if(control.cameraRight) camera.rotateY(-0.03)
 }
 
 export const Player = (props) => {
 
-    const [state, setState] = useState({ velocity: [0, 0, 0] })
+    const velocity = useRef([0, 0, 0])
+    useEffect(() => api.velocity.subscribe((v) => (velocity.current = v)), [])
 
     const { camera } = useThree()
 
@@ -32,14 +36,17 @@ export const Player = (props) => {
     const [ref, api] = useSphere(() => ({
         mass: 1,
         type: 'Dynamic',
+        onCollide: (e) => {console.log(e)},
         ...props,
     }));
 
     useFrame(() => {
         camera.position.copy(ref.current.position);
 
-        setState({ ...state, velocity: updateVelocity(state.velocity, control,camera.rotation) })
-        api.velocity.set(state.velocity[0], state.velocity[1], state.velocity[2])
+        let newVelocity  = updateVelocity(velocity.current, control,camera.rotation)
+        api.velocity.set(newVelocity[0], newVelocity[1], newVelocity[2])
+
+        updateCamera(camera,control)
 
     });
 

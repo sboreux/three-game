@@ -7,8 +7,11 @@ export const useKeyboardControls = () => {
     const keyMap = {
         ArrowUp: 'moveForward',
         ArrowDown: 'moveBackward',
-        ArrowLeft: 'moveLeft',
-        ArrowRight: 'moveRight'
+        KeyA: 'moveLeft',
+        KeyD: 'moveRight',
+        ArrowLeft:'cameraLeft',
+        ArrowRight:'cameraRight',
+        Space: 'Jump',
 
     }
 
@@ -16,19 +19,22 @@ export const useKeyboardControls = () => {
         moveBackward: false,
         moveLeft: false,
         moveRight: false,
+        cameraLeft: false,
+        cameraRight: false,
+        Jump: false
       });
 
 
     useEffect(() => {
-        let keydown = ({key}) => {
-            if (key in keyMap) {
-                setState({...state,  [keyMap[key]]: true})
+        let keydown = ({code} ) => {
+            if (code in keyMap) {
+                setState({...state,  [keyMap[code]]: true})
             }
         }
 
-        let keyup = ({key}) => {
-            if (key in keyMap) {
-                setState({...state,  [keyMap[key]]: false})
+        let keyup = ({code}) => {
+            if (code in keyMap) {
+                setState({...state,  [keyMap[code]]: false})
             }
         }
 
