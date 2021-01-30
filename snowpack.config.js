@@ -4,6 +4,7 @@ module.exports = {
     /* ... */
   },
   plugins: [
+    '@snowpack/plugin-sass'
     /* ... */
   ],
   routes: [
@@ -15,6 +16,7 @@ module.exports = {
     // "bundle": true,
   },
   packageOptions: {
+    polyfillNode: false
     /* ... */
   },
   devOptions: {
